@@ -19,6 +19,97 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    //学习barrier异步栅栏调用
+    [self learnBarrier];
+    //应用barrier：模拟一个多读单写场景
+   // [self writeAndRead];
+   
+}
+
+-(void)learnBarrier{
+    [self concurrentQueueAsyncAndSync2BarrrierTest];
+    
+}
+
+///并发队列   栅栏函数
+- (void)concurrentQueueAsyncAndSync2BarrrierTest
+{
+    
+    dispatch_queue_t concurrentQueue = dispatch_queue_create("concurrentQueue", DISPATCH_QUEUE_CONCURRENT);
+    
+    dispatch_async(concurrentQueue, ^{
+        
+        [self forNumIncrementCondition:5 actionBlock:^(int i) {
+            NSLog(@"任务1 %d",i);
+        }];
+    });
+    
+    dispatch_async(concurrentQueue, ^{
+        
+        [self forNumIncrementCondition:5 actionBlock:^(int i) {
+            NSLog(@"任务2 %d",i);
+        }];
+    });
+    
+    
+    NSLog(@"同步栅栏 start😊");
+    dispatch_barrier_sync(concurrentQueue, ^{
+        
+        [self forNumIncrementCondition:5 actionBlock:^(int i) {
+            NSLog(@"同步栅栏, %@",[NSThread currentThread]);
+        }];
+    });
+    NSLog(@"同步栅栏 end😊");
+    
+    
+    dispatch_async(concurrentQueue, ^{
+        [self forNumIncrementCondition:5 actionBlock:^(int i) {
+            NSLog(@"任务3 %d",i);
+        }];
+    });
+    
+    dispatch_async(concurrentQueue, ^{
+        
+        [self forNumIncrementCondition:5 actionBlock:^(int i) {
+            NSLog(@"任务4 %d",i);
+        }];
+    });
+    
+    NSLog(@"异步栅栏 start 😄");
+    dispatch_barrier_async(concurrentQueue, ^{
+        [self forNumIncrementCondition:5 actionBlock:^(int i) {
+            NSLog(@"异步栅栏 %@",[NSThread currentThread]);
+        }];
+    });
+    
+    NSLog(@"异步栅栏 end 😄");
+    
+    dispatch_async(concurrentQueue, ^{
+        
+        [self forNumIncrementCondition:5 actionBlock:^(int i) {
+            NSLog(@"任务5 %d",i);
+        }];
+    });
+    dispatch_async(concurrentQueue, ^{
+        
+        [self forNumIncrementCondition:5 actionBlock:^(int i) {
+            NSLog(@"任务6 %d",i);
+        }];
+    });
+    
+}
+
+- (void)forNumIncrementCondition:(NSUInteger )num  actionBlock:(void(^)(int i))actionBlcok
+{
+    for (int a = 0; a < num; a ++)
+    {
+        if (actionBlcok) {
+            actionBlcok(a);
+        }
+    }
+}
+
+-(void)writeAndRead{
     
     dispatch_queue_t concurrentQueue = dispatch_queue_create("v_zhanggaotong", DISPATCH_QUEUE_CONCURRENT);
     
@@ -41,7 +132,6 @@
         //读取：
         [self readNSLog:@"??????"];
     });
-    
 }
 
 -(void)readNSLog:(NSString *)logStr{
