@@ -1,0 +1,2 @@
+# dispatch_barriar_async
+dispatch_barriar_async:多读单写
