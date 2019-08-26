@@ -1,2 +1,2 @@
-# dispatch_barriar_async
-dispatch_barriar_async:多读单写
+# dispatch_barrier_async
+dispatch_barrier_async:多读单写
